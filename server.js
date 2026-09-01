@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs');
 const { Pool } = require('pg');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
@@ -8,6 +9,16 @@ require('dotenv').config();
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const mollieClient = createMollieClient({ apiKey: process.env.MOLLIE_API_KEY });
+
+async function zetDatabaseKlaar() {
+  try {
+    const schema = fs.readFileSync(__dirname + '/schema.sql', 'utf8');
+    await pool.query(schema);
+    console.log('Database-tabellen staan klaar (aangemaakt indien nodig)');
+  } catch (e) {
+    console.error('Kon schema niet uitvoeren:', e.message);
+  }
+}
 
 const app = express();
 app.use(cors());
@@ -200,4 +211,7 @@ app.post('/admin/reviews/:id/resolve', requireAuth, async (req, res) => {
 app.get('/', (req, res) => res.json({ status: 'Monsega-backend draait' }));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Monsega-backend luistert op poort ${PORT}`));
+zetDatabaseKlaar().then(() => {
+  app.listen(PORT, () => console.log(`Monsega-backend luistert op poort ${PORT}`));
+});
+
