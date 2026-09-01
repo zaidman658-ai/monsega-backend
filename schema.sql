@@ -1,6 +1,6 @@
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT UNIQUE NOT NULL,
   wachtwoord_hash TEXT NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE users (
   aangemaakt_op TIMESTAMPTZ DEFAULT now()
 );
 
-CREATE TABLE profielen (
+CREATE TABLE IF NOT EXISTS profielen (
   user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
   foto_urls TEXT[] DEFAULT '{}',
   bio TEXT,
@@ -21,7 +21,7 @@ CREATE TABLE profielen (
   connectie_tags TEXT[] DEFAULT '{}'
 );
 
-CREATE TABLE matches (
+CREATE TABLE IF NOT EXISTS matches (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_a_id UUID REFERENCES users(id),
   user_b_id UUID REFERENCES users(id),
@@ -29,7 +29,7 @@ CREATE TABLE matches (
   aangemaakt_op TIMESTAMPTZ DEFAULT now()
 );
 
-CREATE TABLE dates (
+CREATE TABLE IF NOT EXISTS dates (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   match_id UUID REFERENCES matches(id),
   voorgestelde_tijden_a TIMESTAMPTZ[] DEFAULT '{}',
@@ -39,7 +39,7 @@ CREATE TABLE dates (
   status TEXT NOT NULL DEFAULT 'tijden_kiezen' CHECK (status IN ('tijden_kiezen','bevestigd','voltooid','no_show'))
 );
 
-CREATE TABLE betalingen (
+CREATE TABLE IF NOT EXISTS betalingen (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   date_id UUID REFERENCES dates(id),
   user_id UUID REFERENCES users(id),
@@ -49,7 +49,7 @@ CREATE TABLE betalingen (
   aangemaakt_op TIMESTAMPTZ DEFAULT now()
 );
 
-CREATE TABLE checkins (
+CREATE TABLE IF NOT EXISTS checkins (
   date_id UUID REFERENCES dates(id),
   user_id UUID REFERENCES users(id),
   kwam_opdagen BOOLEAN NOT NULL,
@@ -57,7 +57,7 @@ CREATE TABLE checkins (
   PRIMARY KEY (date_id, user_id)
 );
 
-CREATE TABLE reviews (
+CREATE TABLE IF NOT EXISTS reviews (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   date_id UUID REFERENCES dates(id),
   reden TEXT NOT NULL CHECK (reden IN ('tegenstrijdige_meldingen','herhaalde_no_show')),
