@@ -190,6 +190,11 @@ app.get('/admin/stats', requireAuth, async (req, res) => {
   res.json({ actieveGebruikers: Number(gebruikers.count), datesDezeWeek: Number(datesWeek.count), omzetDezeWeek: Number(omzet.totaal), openReviews: Number(reviews.count) });
 });
 
+app.get('/admin/users', requireAuth, async (req, res) => {
+  const { rows } = await pool.query(`SELECT id, naam, leeftijd, aangemaakt_op FROM users ORDER BY aangemaakt_op DESC`);
+  res.json(rows);
+});
+
 app.get('/admin/matches', requireAuth, async (req, res) => {
   const { rows } = await pool.query(`
     SELECT d.id, ua.naam AS naam_a, ub.naam AS naam_b, d.bevestigde_tijd, d.locatie, d.status
@@ -214,4 +219,3 @@ const PORT = process.env.PORT || 3000;
 zetDatabaseKlaar().then(() => {
   app.listen(PORT, () => console.log(`Monsega-backend luistert op poort ${PORT}`));
 });
-
